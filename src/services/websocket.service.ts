@@ -55,21 +55,34 @@ export class WebSocketService {
     this.socket.emit(event, ...args);
   }
 
-   async connect() {
-     if (this.socket.connected) { return true; }
+  async connect() {
+      console.log("Connecting Socket.IO to:", environment.apiUrl);
+      if (this.socket.connected) {
+          console.log("Socket.IO already connected");
+          return true;
+      }
 
-     const success$ = this.onConnect$.pipe(
-       take(1),
-       map(() => true)
-     );
+      console.log("Connecting Socket.IO to:", environment.apiUrl);
 
-     const error$ = this.onConnectError$.pipe(
-       take(1),
-       map(() => false)
-     );
+      const success$ = this.onConnect$.pipe(
+          take(1),
+          map(() => {
+              console.log("Socket.IO connected!");
+              return true;
+          })
+      );
 
-     this.socket.connect();
-     return firstValueFrom(race(success$, error$));
+      const error$ = this.onConnectError$.pipe(
+          take(1),
+          map((error) => {
+              console.error("Socket.IO connection error:", error);
+              return false;
+          })
+      );
+
+      this.socket.connect();
+
+      return firstValueFrom(race(success$, error$));
   }
 
   /**
