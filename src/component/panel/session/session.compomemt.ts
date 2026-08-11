@@ -73,24 +73,48 @@ export class CelioSessionComponent {
   }
 
   async enterSession(userSessionId?: string) {
-    if (!await this.socket.connect()) {
-      this.toastService.show("Could not connect to Server", 'error', 4000)
-      console.error("Could not connect to Server");
-    }
-    this.playerSessionService.enterSession(userSessionId).then(session => {
-      this.createSessionEvent.emit();
-      if (userSessionId) {
-        this.updateSessionState(SessionState.Commit);
-      } else {
-        this.updateSessionState(SessionState.Waiting);
+
+      if (userSessionId !== undefined) {
+          userSessionId = userSessionId.trim();
+
+          if (!/^\d{4}$/.test(userSessionId)) {
+              this.toastService.show(
+                  "Session code must be 4 digits",
+                  "error",
+                  3000
+              );
+              return;
+          }
       }
-      this.sessionId = session.id;
-    }).catch(error => {
-      this.toastService.show(error, 'error', 4000)
-      console.error(error);
-      this.socket.disconnect();
-      this.updateSessionState(SessionState.Start);
-    })
+
+      if (!await this.socket.connect()) {
+          this.toastService.show(
+              "Could not connect to Server",
+              'error',
+              4000
+          );
+          console.error("Could not connect to Server");
+          return;
+      }
+
+      this.playerSessionService.enterSession(userSessionId)
+          .then(session => {
+              this.createSessionEvent.emit();
+
+              if (userSessionId) {
+                  this.updateSessionState(SessionState.Commit);
+              } else {
+                  this.updateSessionState(SessionState.Waiting);
+              }
+
+              this.sessionId = session.id;
+          })
+          .catch(error => {
+              this.toastService.show(error, 'error', 4000);
+              console.error(error);
+              this.socket.disconnect();
+              this.updateSessionState(SessionState.Start);
+          });
   }
 
   leaveSession() {

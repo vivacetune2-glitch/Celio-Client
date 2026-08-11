@@ -8,13 +8,20 @@
         </div>
         <div class="divider divider-horizontal"><div class="font-Gen3 text-4xl">OR</div></div>
         <div class="card rounded-box grid grow place-items-center">
-          <input #sessionInput (keydown.enter)="enterSession(sessionInput.value)" type="text" placeholder="Enter Session Id" class="input input-lg w-3xs font-Gen3 text-2xl" />
+          <input #sessionInput
+                 (keydown.enter)="enterSession(sessionInput.value)"
+                 type="text"
+                 inputmode="numeric"
+                 maxlength="4"
+                 pattern="[0-9]{4}"
+                 placeholder="Enter 4-digit Code"
+                 class="input input-lg w-3xs font-Gen3 text-2xl" />
         </div>
       </div>
 
       <div *ngIf="state | hasReachedState : SessionState.Waiting" class="flex w-full h-[5rem]">
         <div class="font-Gen3 text-4xl">
-          Connected to Session: <br>
+          Connected to Session Code: <br>
           {{sessionId}}
           <button (click)="copySessionId()" class="btn text-2xl btn-sm">Copy</button>
         </div>
